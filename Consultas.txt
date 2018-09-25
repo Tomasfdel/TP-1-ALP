@@ -3,3 +3,5 @@ Para el intérprete del ejercicio 7, en evalComm Repeat, deberíamos rearmar el co
 En el 7, nuestra forma de manejar el error de variable no definida es hacer un pattern matching no exhaustivo en lookfor?
 Está bien pensada nuestra estructuración del código en Eval2.hs?
 Deberíamos aplicar una función también en evalComm para captar patrones?
+Ejercicio 9, debemos devolver traza si hay un error?
+Cómo agregar comillas dobles al string de la traza
