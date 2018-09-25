@@ -1,0 +1,3 @@
+Podemos suponer para el 5 que la evaluación big step es consistente?
+Para el intérprete del ejercicio 7, en evalComm Repeat, deberíamos rearmar el comando como lo hicimos o interpretar los comandos internamente?
+En el 7, nuestra forma de manejar el error de variable no definida es hacer un pattern matching no exhaustivo en lookfor?
