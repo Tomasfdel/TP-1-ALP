@@ -1,0 +1,278 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{gensymb}
+\usepackage{float}
+\usepackage{color}
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{mathpartir}
+\usepackage{listings}
+\usepackage[spanish,es-tabla]{babel}
+\title{Trabajo Práctico Final}
+\author{Integrantes: Tomás Fernández De Luco y Ignacio Sebastián Moliné}
+\date{28 de septiembre de 2018}
+\topmargin=-2cm
+\oddsidemargin=0cm
+\textheight=24cm
+\textwidth=17cm
+\newcommand*\rfrac[2]{{}^{#1}\!/_{#2}}
+\begin{document}
+\begin{titlepage}
+
+\begin{minipage}{2.6cm}
+\includegraphics[width=\textwidth]{fceia.pdf}
+\end{minipage}
+\hfill
+%
+\begin{minipage}{6cm}
+\begin{center}
+\normalsize{Universidad Nacional de Rosario\\
+Facultad de Ciencias Exactas,\\
+Ingeniería y Agrimensura\\}
+\vspace{0.5cm}
+\large
+Lic. en Cs. de la Computación
+\end{center}
+\end{minipage}
+\hspace{0.5cm}
+\hfill
+\begin{minipage}{2.6cm}
+\includegraphics[width=\textwidth]{unr.pdf}
+\end{minipage}
+
+\vspace{5.5cm}
+
+\begin{center}
+\LARGE{\sc Análisis de Lenguajes de Programación}\\
+\vspace{0.5cm}
+\large{Trabajo Práctico 1}\\
+
+\vspace{5cm}
+
+\large
+Tomás Fernández De Luco F-3443/6\\
+Ignacio Sebastián Moline M-6466/1\\
+
+\vspace*{0.5cm}
+\small{28 de septiembre de 2018}
+
+\makeatletter
+\def\@seccntformat#1{%
+  \expandafter\ifx\csname c@#1\endcsname\c@section\else
+  \csname the#1\endcsname\quad
+  \fi}
+\makeatother
+
+\lstdefinestyle{myCustom}{
+	language=Haskell,
+	numbersep=10pt,
+	tabsize=2,
+	showspaces=false,
+	showstringspaces=false,
+	keepspaces=true,
+	frame=single,
+	commentstyle=\color{blue}
+}
+
+
+\end{center}
+\end{titlepage}
+\lstset{basicstyle=\small,style=myCustom}
+	\newpage
+	
+	\section*{Ejercicio 1}
+	El operador '?:' evalúa a la primera expresión entera si la condición booleana es verdadera
+	y a la segunda en caso contrario. Por lo tanto, para representarlo en la sintaxis se necesitará 
+	una boolexp seguida de dos intexp. La sintaxis abstracta modificada para intexp será: \\
+\\
+	$\begin{aligned}
+		intexp ::=\ &nat\ |\ var\ |\ -_{u} intexp\\
+		|\ &intexp + intexp\\
+		|\ &intexp -_{b} intexp\\
+		|\ &intexp \times intexp\\
+		|\ &intexp \div intexp\\
+		|\ &boolexp\ ?\ intexp : intexp
+	\end{aligned}\\$
+\\
+\\
+	Y la sintaxis concreta correspondiente será:\\
+	$\begin{aligned}
+\\	intexp ::=\ &nat\\
+	|\ &var\\
+	|\ &\text{'-'}\ intexp\\
+	|\ &intexp\ \text{'+'}\ intexp\\
+	|\ &intexp\ \text{'-'}\ intexp\\
+	|\ &intexp\ \text{'*'}\ intexp\\
+	|\ &intexp\ \text{'/'}\  intexp\\
+	|\ &\text{'('}\ intexp\ \text{')'}\\
+	|\ &boolexp\ \text{'?'}\ intexp\ \text{':'}\ intexp
+	\end{aligned}$
+	\section*{Ejercicio 2}
+	Se debe agregar un constructor más al tipo de IntExp con los tipos de datos mencionados previamente.
+	\lstinputlisting[language=Haskell, firstline=6, lastline=15]{AST.hs}
+	\newpage
+	\section*{Ejercicio 3}
+	El código del archivo Parser.hs es el siguiente:
+	\lstinputlisting[language=Haskell, firstline=1, lastline=130]{Parser.hs}
+	
+	\section*{Ejercicio 4}
+	Se necesitarán dos reglas para representar el comportamiento esperado por el operador ternario '?:':
+	\[
+		\inferrule* [right=TernTrue]
+		{\inferrule* [] {}{\langle p,\sigma \rangle \Downarrow _{boolexp} $ \textbf{true}$}
+	\\
+	\inferrule* []{}{\langle e_{1},\sigma \rangle \Downarrow _{intexp} n}}
+	{\langle p$ ? $e_{1}:e_{2},\sigma \rangle \Downarrow _{intexp} n}
+	\] \\
+	\[
+		\inferrule* [right=TernFalse]
+		{\inferrule* [] {}{\langle p,\sigma \rangle \Downarrow _{boolexp} $ \textbf{false}$}
+	\\
+	\inferrule* []{}{\langle e_{2},\sigma \rangle \Downarrow _{intexp} n}}
+	{\langle p$ ? $e_{1}:e_{2},\sigma \rangle \Downarrow _{intexp} n}
+	\]
+	
+	\section*{Ejercicio 5}
+	
+Para demostrar el determinismo de la relación, se probará que si $t \leadsto t'$ y $t\leadsto t''$, entonces $t' = t''$, mediante inducción en la derivación $t \leadsto t'$. Para ello, se supondrá que las relaciones de evaluación big-step para expresiones enteras y booleanas son deterministas.\\
+
+Si la última regla utilizada es ASS, t = $\langle v:=e, \sigma\rangle$ y t\textsc{\char13} = $\langle skip, [\sigma | v : n]\rangle$, sabiendo que $\langle e, \sigma\rangle \Downarrow_{intexp} n.$ 
+Luego, en $t\leadsto t\textsc{\char13}\textsc{\char13}$ no se puede haber aplicado como última regla SEQ$_{1}$, SEQ$_{2}$, IF$_{1}$, IF$_{2}$ o REPEAT, pues ellas requieren que el comando sea de un tipo distinto a la asignación. Por lo tanto, la última regla aplicada en $t\leadsto t\textsc{\char13}\textsc{\char13}$ debe ser ASS. Como la evaluación de expresiones enteras es determinista, tenemos que si $\langle e, \sigma\rangle \Downarrow_{intexp} n$ y $\langle e, \sigma\rangle \Downarrow_{intexp} n\textsc{\char13}$, luego $n = n\textsc{\char13}$. Por lo tanto, $t\textsc{\char13}\textsc{\char13} = \langle skip, [\sigma | v : n]\rangle = t\textsc{\char13}. $\\
+
+Si la última regla fue SEQ$_{1}$, t = $\langle skip;c_{1}, \sigma\rangle$ y $t\textsc{\char13} = \langle c_{1}, \sigma\rangle$. Entonces, en $t \leadsto t\textsc{\char13}\textsc{\char13}$ no se puede haber aplicado ASS, IF$_{1}$, IF$_{2}$ o REPEAT, pues ellas requieren que el comando sea distinto de skip. Tampoco puede haber sido SEQ$_{2}$ ya que requeriría que $\langle skip, \sigma\rangle \leadsto \langle c\textsc{\char13}, \sigma \textsc{\char13}\rangle$, pero no existen reglas que permitan derivarlo, pues es un valor. Por lo tanto, la última regla aplicada en $t \leadsto t\textsc{\char13}\textsc{\char13}$ debe ser SEQ$_{1}$. Entonces, $t\textsc{\char13}\textsc{\char13} = \langle c_{1}, \sigma\rangle = t\textsc{\char13}.$\\
+
+Si la última regla fue SEQ$_{2}$, t = $\langle c_{0};c_{1}, \sigma\rangle$ y $t\textsc{\char13} = \langle c_{0}\textsc{\char13};c_{1}, \sigma\textsc{\char13}\rangle$, sabiendo que $\langle c_{0}, \sigma\rangle \leadsto \langle c_{0}\textsc{\char13}, \sigma\textsc{\char13}\rangle$. Entonces, en $t \leadsto t\textsc{\char13}\textsc{\char13}$ no se puede haber aplicado ASS, IF$_{1}$, IF$_{2}$ o REPEAT, pues ellas requieren que el comando no sea una sucesión de dos subcomandos. Tampoco puede haber sido SEQ$_{1}$ ya que $\langle c_{0}, \sigma\rangle$ evalúa en un paso a $\langle c_{0}\textsc{\char13}, \sigma\textsc{\char13}\rangle,$ por la premisa de SEQ$_{2}$ en $t \leadsto t\textsc{\char13}$. Entonces, $c_{1}$ no puede ser skip, porque en ese caso, t no evaluaría a nada. Por lo tanto, la última regla aplicada en $t \leadsto t\textsc{\char13}\textsc{\char13}$ debe ser SEQ$_{2}$. Sabemos entonces que $t\textsc{\char13}\textsc{\char13} = \langle c_{0}\textsc{\char13}\textsc{\char13}; c_{1}, \sigma\textsc{\char13}\textsc{\char13}\rangle$, con $\langle c_{0}, \sigma\rangle \leadsto \langle c_{0}\textsc{\char13}\textsc{\char13}, \sigma\textsc{\char13}\textsc{\char13}\rangle$. Luego, por hipótesis inductiva, se tiene que la evaluación de $\langle c_{0}, \sigma\rangle$ es determinista, por lo que tenemos que $\langle c_{0}\textsc{\char13}, \sigma\textsc{\char13}\rangle = \langle c_{0}\textsc{\char13}\textsc{\char13}, \sigma\textsc{\char13}\textsc{\char13}\rangle$. Entonces, $t\textsc{\char13} = \langle c_{0}\textsc{\char13}; c_{1}, \sigma\textsc{\char13}\rangle = \langle c_{0}\textsc{\char13}\textsc{\char13}; c_{1}, \sigma\textsc{\char13}\textsc{\char13}\rangle = t\textsc{\char13}\textsc{\char13}$.\\
+
+Si la última regla utilizada es IF$_{1}$, t = $\langle $if $ b$ then $c_{0}$ else $c_{1}, \sigma\rangle$ y $t\textsc{\char13} = \langle c_{0}, \sigma\rangle$, sabiendo que $\langle b, \sigma\rangle \Downarrow_{boolexp} true$. Luego, la última regla aplicada en $t\leadsto t\textsc{\char13}\textsc{\char13}$ no puede haber sido ASS, SEQ$_{1}$, SEQ$_{2}$ o REPEAT, pues ellas requieren que el comando sea de un tipo distinto a un if. Además, sabiendo que la relación de evaluación de expresiones booleanas es determinista, $\langle b, \sigma\rangle$ evalúa sólo a true, por lo que tampoco podría haberse usado IF$_{2}$. Por lo tanto, la última regla aplicada en $t\leadsto t\textsc{\char13}\textsc{\char13}$ debe ser IF$_{1}$. Entonces, tenemos que $t\textsc{\char13}\textsc{\char13} = \langle c_{0}, \sigma\rangle = t\textsc{\char13}$. La demostración es análoga para el caso de IF$_{2}$.\\
+
+Si la última regla fue REPEAT, t = $\langle repeat $  c $ until $ b, $\sigma \rangle$ y $t\textsc{\char13} = \langle c;$ if $b$ then $skip$ else $repeat$ c $until$ b, $\sigma\rangle$. Entonces, en $t \leadsto t\textsc{\char13}\textsc{\char13}$ no se puede haber aplicado ninguna otra regla, pues necesitan comandos distintos a un repeat. Por lo tanto, la última regla aplicada en $t \leadsto t\textsc{\char13}\textsc{\char13}$ debe ser REPEAT. Entonces, $t\textsc{\char13}\textsc{\char13} = \langle c;$ if $b$ then $skip$ else $repeat$ c $until$ b, $\sigma\rangle = t\textsc{\char13}.$
+
+	\newpage
+	\section*{Ejercicio 6}
+	Para la resolución del ejercicio, se optó por dividir el árbol de derivación, dado que es demasiado grande para mostrarlo completo, y se considera que su desarrollo y explicación serán más claros de esta manera. Se comenzará con desarrollar la siguiente expresión: 
+	\[
+	\inferrule* [right=SEQ$_{2}$]
+	{\inferrule* [right=ASS] 
+		{\inferrule* [right=PLUS]
+			{\inferrule* [right=VAR]
+				{\inferrule* [] {}{ }
+					\\
+				}
+				{\langle x,[\sigma | x:0] \rangle \Downarrow _{intexp} 0 }
+				\inferrule* [right=NVAL]
+				{\inferrule* [] {}{ }
+					\\
+				}
+				{\langle 1,[\sigma | x:0] \rangle \Downarrow _{intexp} 1}
+			}
+			{\langle x+1,[\sigma | x:0] \rangle \Downarrow _{intexp} 0+1 = 1}
+		}
+		{\langle x:=x+1, [\sigma | x:0] \rangle 
+			\leadsto \langle skip, [\sigma | x:1] \rangle }
+		\\
+	}
+	{\langle x:=x+1; $ if $ x>0$ then $skip$ else $x:=x-1, [\sigma | x:0] \rangle 
+		\leadsto \langle skip; $ if $ x>0$ then $skip$ else $ x:=x-1, [\sigma | x:1] \rangle }
+	\]\\
+
+ Sean $t_{1} = \langle x:=x+1; $ if $ x>0$ then $skip$ else $x:=x-1, [\sigma | x:0] \rangle$ y $t_{2} = \langle skip; $ if $ x>0$ then $skip$ else $ x:=x-1, [\sigma | x:1] \rangle$. 
+Puede verse por el árbol anterior que $t_{1} \leadsto t_{2}$. Luego, 
+	
+		\[
+	\inferrule* [right=SEQ$_{1}$]
+	{\inferrule* [] {}{ }}
+	{t_{2} \leadsto \langle $if $ x>0$ then $skip$ else $ x:=x-1, [\sigma | x:1] \rangle}
+	\]
+	
+Ahora, sea $t_{3} = \langle $if $ x>0$ then $skip$ else $ x:=x-1, [\sigma | x:1] \rangle $. Entonces, 
+
+\[
+\inferrule* [right=IF$_{1}$]
+{\inferrule* [right=GT] 
+	{\inferrule* [right=VAR]
+		{\inferrule* [] {}{ }
+			\\
+		}
+		{\langle x,[\sigma | x:1] \rangle \Downarrow _{intexp} 1 }
+		\inferrule* [right=NVAL]
+		{\inferrule* [] {}{ }
+			\\
+		}
+		{\langle 0,[\sigma | x:0] \rangle \Downarrow _{intexp} 0}
+	}
+	{\langle x>0, [\sigma | x:1] \rangle \Downarrow _{boolexp} 1>0 = true}
+	\\
+}
+{t_{3} \leadsto \langle skip, [\sigma | x:1] \rangle }
+\]
+
+Donde $t_{4} =\langle skip, [\sigma | x:1] \rangle$.
+
+Como $\leadsto*$ es una clausura de $\leadsto$, tenemos que
+\[
+\inferrule* []
+{t_{1} \leadsto  t_{2}}
+{t_{1} \leadsto$* $  t_{2} }
+\]
+\[
+\inferrule* []
+{t_{2} \leadsto  t_{3}}
+{t_{2} \leadsto$* $  t_{3} }
+\]
+\[
+\inferrule* []
+{t_{3} \leadsto  t_{4}}
+{t_{3} \leadsto$* $  t_{4} }
+\]
+
+Por último, como la relación es transitiva, se tiene que:
+
+\[
+\inferrule* []
+{\inferrule* []
+	{t_{1} \leadsto$* $  t_{2} \quad t_{2} \leadsto$* $  t_{3}
+	}
+	{t_{1} \leadsto$* $  t_{3}
+	}
+	{t_{3} \leadsto$* $  t_{4} }
+}
+{t_{1} \leadsto$* $  t_{4} }
+\]
+
+ Completando así la prueba.
+
+\newpage
+	\section*{Ejercicio 7}
+	Para el caso del error de división por cero, se deja que Haskell maneje el error y aborte la ejecución.
+	Para las variables no definidas, se hizo un pattern matching no exhaustivo en la función $lookfor$ así no habrá un comportamiento especificado en caso de no encontrar la variable en la lista de estados. El código del archivo Eval1.hs es el siguiente:
+	\lstinputlisting[language=Haskell, firstline=1, lastline=80]{Eval1.hs}
+\newpage	
+	\section*{Ejercicio 8}
+	El código del archivo Eval2.hs es el siguiente:
+	\lstinputlisting[language=Haskell, firstline=1, lastline=121]{Eval2.hs}
+\newpage	
+	\section*{Ejercicio 9}
+	Ahora $evalComm$ devuelve un par cuyo primer elemento es un estado o error, y el segundo es la traza de asignaciones de variables hasta el final normal de la ejecución, o el error que la interrumpa. El código del archivo Eval3.hs es el siguiente:
+	\lstinputlisting[language=Haskell, firstline=1, lastline=128]{Eval3.hs}
+	\section*{Ejercicio 10}
+	De manera similar al ejercicio 1, se extiende la sintaxis abstracta del tipo $comm$ para agregar un comando adicional. El resultado final será:\\
+\\	$\begin{aligned}
+		comm ::=\ &\textbf{skip}\\
+		|\ &var\ :=\ intexp\\
+		|\ &comm;comm\\
+		|\ &\textbf{if\ } boolexp \textbf{\ then\  } comm \textbf{\ else\ } comm\\
+		|\ &\textbf{repeat\ }comm\ boolexp\\
+		|\ &\textbf{while\ } boolexp\  comm
+	\end{aligned}\\$
+\\
+	El esquema de reglas para la sintaxis operacional de $while$ será muy similar a la del $repeat$. En caso de que la condición sea cierta, se realizará el comando seguido de volver a ejecutar el ciclo; si no, se terminará el comando con un $skip$. 
+	\[
+		\inferrule* [right=WHILE]
+		{\inferrule* [] {}{ }
+			\\
+		}
+		{\langle $while $b$ do $c, \sigma \rangle \leadsto \langle  $if $ b$ then $c; $ while $b $ do $c$ else $ skip, \sigma \rangle}
+	\]
+\end{document}
