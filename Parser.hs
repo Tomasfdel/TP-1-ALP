@@ -5,7 +5,6 @@ import Text.Parsec.Token
 import Text.Parsec.Language (emptyDef)
 import AST
 
------------------------
 -- Funcion para facilitar el testing del parser.
 totParser :: Parser a -> Parser a
 totParser p = do 
@@ -21,13 +20,11 @@ lis = makeTokenParser (emptyDef   { commentStart  = "/*"
                                   , commentLine   = "//"
                                   , opLetter      = char '='
                                   , reservedNames = ["true","false","skip","if",
-                                                     "then","else","end", "while","do", "repeat"]
-                                  })
-  
+                                                     "then","else","end",
+                                                     "while","do", "repeat"]})
 ----------------------------------
 --- Parser de expressiones enteras
 -----------------------------------
-
 intexp :: Parser IntExp
 intexp  = chainl1 term addopp
 
@@ -55,9 +52,7 @@ addopp = do try (reservedOp lis "+")
 -----------------------------------
 --- Parser de expressiones booleanas
 ------------------------------------
-
 boolexp :: Parser BoolExp
-
 boolexp  = chainl1 boolexp2 (try (do reservedOp lis "|"
                                      return Or))
 
@@ -91,7 +86,6 @@ boolvalue = try (do reserved lis "true"
 -----------------------------------
 --- Parser de comandos
 -----------------------------------
-
 comm :: Parser Comm
 comm = chainl1 comm2 (try (do reservedOp lis ";"
                               return Seq))
@@ -119,7 +113,7 @@ comm2 = try (do reserved lis "skip"
 
 
 ------------------------------------
--- Función de parseo
+-- Funcion de parseo
 ------------------------------------
 parseComm :: SourceName -> String -> Either ParseError Comm
-parseComm = parse (totParser comm)
+parseComm = parse (totParser comm) 
