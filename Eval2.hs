@@ -34,7 +34,6 @@ handleBinExpr (Left error1) _ _ = Left error1
 handleBinExpr _ (Left error2) _ = Left error2
 handleBinExpr (Right val1) (Right val2) f = Right (f val1 val2)
 
-
 -- Evalua un programa en el estado nulo
 eval :: Comm -> Either Error State
 eval p = evalComm p initState
@@ -72,7 +71,6 @@ evalIntExp (Div intE1 intE2) state =
           Right 0 -> Left DivByZero
           x -> handleBinExpr (evalIntExp intE1 state) x (\x y -> div x y)
 
-
 -- Evalua una expresion entera, sin efectos laterales
 evalBoolExp :: BoolExp -> State -> Either Error Bool
 evalBoolExp BTrue state = Right True
@@ -88,4 +86,3 @@ evalBoolExp (And boolE1 boolE2) state =
 evalBoolExp (Or boolE1 boolE2) state = 
     handleBinExpr (evalBoolExp boolE1 state) (evalBoolExp boolE2 state) (\x y -> x || y)
 evalBoolExp (Not boolE) state = handleUnExpr (evalBoolExp boolE state) (\x -> not x)
-
