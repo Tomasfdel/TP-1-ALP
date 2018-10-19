@@ -1,0 +1,14 @@
+-- not b = if b then false else true
+def not = \b. b false true
+
+-- sub x y = foldn y pred x
+def sub = \x y. y pred x
+
+-- greater x y = not (iszero (sub x y))
+def greater = \x y. not (is0 (sub x y))
+
+-- div x n = if (greater n x) then 0 else suc (div (sub x n) n)
+def div = Y (\f x n. (greater n x) zero (suc (f (sub x n) n)))
+
+-- log2 n = if (iszero (n - 1)) && not (iszero n) then 0 else 1 + log2(divi n 2)
+def log2 = Y (\f n. (and (is0 (pred n)) (not (is0 n))) zero (suc (f (div n 2))))

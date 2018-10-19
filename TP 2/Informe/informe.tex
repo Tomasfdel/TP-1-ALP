@@ -1,0 +1,119 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{gensymb}
+\usepackage{float}
+\usepackage{color}
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{mathpartir}
+\usepackage{listings}
+\usepackage[spanish,es-tabla]{babel}
+\title{Trabajo Práctico Final}
+\author{Integrantes: Tomás Fernández De Luco y Ignacio Sebastián Moliné}
+\date{18 de octubre de 2018}
+\topmargin=-2cm
+\oddsidemargin=0cm
+\textheight=24cm
+\textwidth=17cm
+\newcommand*\rfrac[2]{{}^{#1}\!/_{#2}}
+\begin{document}
+\begin{titlepage}
+
+\begin{minipage}{2.6cm}
+\includegraphics[width=\textwidth]{fceia.pdf}
+\end{minipage}
+\hfill
+%
+\begin{minipage}{6cm}
+\begin{center}
+\normalsize{Universidad Nacional de Rosario\\
+Facultad de Ciencias Exactas,\\
+Ingeniería y Agrimensura\\}
+\vspace{0.5cm}
+\large
+Lic. en Cs. de la Computación
+\end{center}
+\end{minipage}
+\hspace{0.5cm}
+\hfill
+\begin{minipage}{2.6cm}
+\includegraphics[width=\textwidth]{unr.pdf}
+\end{minipage}
+
+\vspace{5.5cm}
+
+\begin{center}
+\LARGE{\sc Análisis de Lenguajes de Programación}\\
+\vspace{0.5cm}
+\large{Trabajo Práctico 2}\\
+
+\vspace{5cm}
+
+\large
+Tomás Fernández De Luco F-3443/6\\
+Ignacio Sebastián Moline M-6466/1\\
+
+\vspace*{0.5cm}
+\small{18 de octubre de 2018}
+
+\makeatletter
+\def\@seccntformat#1{%
+  \expandafter\ifx\csname c@#1\endcsname\c@section\else
+  \csname the#1\endcsname\quad
+  \fi}
+\makeatother
+
+\lstdefinestyle{myCustom}{
+	language=Haskell,
+	numbersep=10pt,
+	tabsize=2,
+	showspaces=false,
+	showstringspaces=false,
+	keepspaces=true,
+	frame=single,
+	commentstyle=\color{blue}
+}
+
+
+\end{center}
+\end{titlepage}
+\lstset{basicstyle=\small,style=myCustom}
+	\newpage
+	
+	\section*{Ejercicio 1}
+
+	\lstinputlisting[language=Haskell, firstline=12, lastline=23]{Parser.hs}
+		
+	\section*{Ejercicio 2}
+	La conversión se realiza en la función convAux, la cual toma un Term y una lista de Strings que corresponde a los nombres de las variables con ocurrencia de ligadura encontradas hasta este momento, ordenadas desde la más cercana a la más lejana.
+	
+	 Si se quiere convertir una variable, se la buscará en el listado con la función lookFor. Si se la encuentra, la misma devuelve la cantidad de ligaduras previas hasta la primera ocurrencia de la variable en el listado. En caso contrario, se devuelve -1, con lo que se dejará a la variable como libre en la conversión de términos.
+	
+	Si se quiere convertir una abstracción, se convertirá su término interior habiendo agregado la variable ligada por la abstracción en la cabecera del listado.
+	
+	
+	\lstinputlisting[language=Haskell, firstline=9, lastline=28]{Untyped.hs}	
+		\newpage
+			
+	\section*{Ejercicio 3}
+	Como la función shift es llamada en funciones de ejercicios posteriores, siempre con un argumento C = 0, se optó por definirla para que responda a ese comportamiento. La función que realmente realiza lo pedido en el ejercicio es shiftAux.
+	\lstinputlisting[language=Haskell, firstline=30, lastline=44]{Untyped.hs}	
+	
+	\section*{Ejercicio 4}
+	
+	\lstinputlisting[language=Haskell, firstline=46, lastline=53]{Untyped.hs}
+	\newpage
+		
+	\section*{Ejercicio 5}
+	Definimos la función betaRed, que realiza la $\beta$-reducción de un término según lo especificado en el enunciado. Para nuestra función de evaluación fuimos considerando cuáles de las reglas de reducción normal deberían aplicarse a cada uno de los valores de nuestro tipo de datos para términos.
+	
+	\lstinputlisting[language=Haskell, firstline=54, lastline=200]{Untyped.hs}
+		
+	\section*{Ejercicio 6}
+
+	\lstinputlisting[firstline=1, lastline=200]{Log.lam}
+	
+	
+\end{document}
