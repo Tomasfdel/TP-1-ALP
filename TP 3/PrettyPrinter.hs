@@ -37,14 +37,21 @@ pp ii vs (Let lt1 lt2) = text "let " <>
 pp ii vs (As lt typ) = parensIf (isApp lt || isLam lt || isLet lt || isAs lt) (pp ii vs lt) <>
                        text " as " <>
                        printType typ
-pp ii vs UnitT = text "unit"
+pp ii vs  UnitT = text "unit"
 pp ii vs (TupleT lt1 lt2) = parens ((pp ii vs lt1) <>
                                    text ", " <>
                                    (pp ii vs lt2))
 pp ii vs (First lt) = text "fst " <>
-                      pp ii vs lt
-pp ii vs (Second lt) = text "fst " <>
-                       pp ii vs lt
+                      parensIf (isApp lt || isLam lt || isLet lt || isAs lt || isTupleOp lt) (pp ii vs lt)
+pp ii vs (Second lt) = text "snd " <>
+                       parensIf (isApp lt || isLam lt || isLet lt || isAs lt || isTupleOp lt) (pp ii vs lt)
+pp ii vs ZeroT = text "0"
+pp ii vs (SuccT lt) = text "succ " <>
+                      parensIf (isLam lt || isApp lt || isLet lt || isAs lt || isTupleOp lt || isNatOp lt) (pp ii vs lt)
+pp ii vs (RT lt1 lt2 lt3) = text "R " <>
+                            sep [parensIf (isLam lt1 || isApp lt1 || isLet lt1 || isAs lt1) (pp ii vs lt1), 
+                                 nest 1 (parensIf (isLam lt2 || isApp lt2 || isLet lt2 || isAs lt2) (pp ii vs lt2)), 
+                                 nest 1 (parensIf (isLam lt3 || isApp lt3 || isLet lt3 || isAs lt3) (pp ii vs lt3))]  
 
 isLam :: Term -> Bool                    
 isLam (Lam _ _) = True
@@ -60,14 +67,32 @@ isLet _         = False
 
 isAs :: Term -> Bool
 isAs (As _ _) = True
-isAs _        = False                                                               
+isAs _        = False
+
+isTupleOp :: Term -> Bool
+isTupleOp (First _)  = True
+isTupleOp (Second _) = True
+isTupleOp _          = False
+
+isNatOp :: Term -> Bool
+isNatOp (SuccT _)  = True
+isNatOp (RT _ _ _) = True
+isNatOp _          = False
 
 -- pretty-printer de tipos
 printType :: Type -> Doc
-printType Base         = text "B"
-printType (Fun t1 t2)  = sep [ parensIf (isFun t1) (printType t1), 
-                               text "->", 
-                               printType t2]
+printType  Base         = text "B"
+printType (Fun t1 t2)   = sep [ parensIf (isFun t1) (printType t1), 
+                                text "->", 
+                                printType t2]
+printType  Unit         = text "Unit"
+printType (Tuple t1 t2) = text "(" <>
+                          printType t1 <>
+                          text ", " <>
+                          printType t2 <>
+                          text ")"
+printType  Nat          = text "Nat"
+
 isFun :: Type -> Bool
 isFun (Fun _ _)        = True
 isFun _                = False
@@ -79,10 +104,13 @@ fv (t :@: u)         = fv t ++ fv u
 fv (Lam _ u)         = fv u
 fv (Let lt1 lt2)     = fv lt1 ++ fv lt2
 fv (As lt typ)       = fv lt
-fv UnitT             = []
-fv (TupleT lt1 lt2)   = fv lt1 ++ fv lt2
+fv  UnitT            = []
+fv (TupleT lt1 lt2)  = fv lt1 ++ fv lt2
 fv (First lt)        = fv lt
 fv (Second lt)       = fv lt
+fv  ZeroT            = []
+fv (SuccT lt)        = fv lt
+fv (RT lt1 lt2 lt3)  = fv lt1 ++ fv lt2 ++ fv lt3
   
 ---
 printTerm :: Term -> Doc 

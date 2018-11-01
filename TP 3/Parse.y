@@ -29,19 +29,25 @@ import Data.Char
     LET     { TLet }
     IN      { TIn }
     AS      { TAs }
+    VUNIT   { TVUnit }
     UNIT    { TUnit }
     FST     { TFirst }
     SND     { TSecond }
+    SUC     { TSuc }
+    REC     { TRec }
+    ZERO    { TZero }
+    NAT     { TNat }
     
 
 %right VAR
 %left '=' 
 %right '->'
 %right '\\' '.' LET IN
-%right FST SND
-%left AS 
+%left AS
 %right REC
 %right SUC 
+%right FST SND
+
 
 
 
@@ -55,6 +61,11 @@ Exp     :: { LamTerm }
         : '\\' VAR ':' Type '.' Exp    { Abs $2 $4 $6 }
         | LET VAR '=' Exp IN Exp       { LLet $2 $4 $6 }
         | Exp AS Type                  { LAs $1 $3}        
+        | FST Exp                      { LFirst $2 }
+        | SND Exp                      { LSecond $2 }
+        | '(' Exp ',' Exp ')'          { LTuple $2 $4 }        
+        | SUC Exp                      { LSucc $2 }
+        | REC Exp Exp Exp              { LR $2 $3 $4 }
         | NAbs                         { $1 }
         
 NAbs    :: { LamTerm }
@@ -63,14 +74,15 @@ NAbs    :: { LamTerm }
 
 Atom    :: { LamTerm }
         : VAR                          { LVar $1 }
-        | FST Exp                      { LFirst $2 }
-        | SND Exp                      { LSecond $2 }
-        | '(' Exp ',' Exp ')'          { LTuple $2 $4 }
+        | VUNIT                        { LUnit }
+        | ZERO                         { LZero }
         | '(' Exp ')'                  { $2 }
 
 Type    : TYPE                         { Base }
         | Type '->' Type               { Fun $1 $3 }
         | UNIT                         { Unit }
+        | '(' Type ',' Type ')'        { Tuple $2 $4 }
+        | NAT                          { Nat }
         | '(' Type ')'                 { $2 }
 
 
@@ -121,9 +133,14 @@ data Token = TVar String
                | TLet
                | TIn
                | TAs
+               | TVUnit
                | TUnit
                | TFirst
                | TSecond
+               | TSuc
+               | TRec
+               | TZero
+               | TNat
                deriving Show
 
 ----------------------------------
@@ -152,9 +169,14 @@ lexer cont s = case s of
                                            ("let", rest) -> cont TLet rest
                                            ("in", rest) -> cont TIn rest
                                            ("as", rest) -> cont TAs rest
-                                           ("unit", rest) -> cont TUnit rest
+                                           ("unit", rest) -> cont TVUnit rest
+                                           ("Unit", rest) -> cont TUnit rest
                                            ("fst", rest) -> cont TFirst rest
                                            ("snd", rest) -> cont TSecond rest
+                                           ("succ", rest) -> cont TSuc rest
+                                           ("rec", rest) -> cont TRec rest
+                                           ("0", rest) -> cont TZero rest
+                                           ("Nat", rest) -> cont TNat rest
                                            (var,rest)   -> cont (TVar var) rest
                           consumirBK anidado cl cont s = case s of
                                                               ('-':('-':cs)) -> consumirBK anidado cl cont $ dropWhile ((/=) '\n') cs
