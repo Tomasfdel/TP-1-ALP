@@ -1,0 +1,90 @@
+PREGUNTAR: EJ 6: Unit se tiene que agregar como término, como valor y como tipo?
+           EJ 8: Definimos un tipo nuevo para tuplas?
+                 En la precedencia de Parse.y, cómo se define el orden?
+                 Qué onda los error de eval? Cómo manejamos eso?
+                 Cómo manejamos first y second?
+                 En la gramática, importa el tipo al que le asignamos las cosas? Ej: FST Atom o FST Exp
+                 Hacemos el prettyprinter pensando en gente que hace términos invalidos? Ej: fst (let x ...)
+
+Ej 1-
+Sea P1 = x : B->B->B, y:B->B, z:B
+
+__________________________ T-Var _______________T-Var    __________________________ T-Var _______________T-Var
+P1 |- x : B -> B -> B             P1 |- z : B             P1 |- y : B -> B                P1 |- z : B
+_______________________________________________T-App      ______________________________________T-App
+              P1|- x z : B -> B                                 P1 |- y z : B
+   ________________________________________________________________________________________T-App
+                                     P1 |- (x z) (y z) : B
+   ________________________________________________________________________________________T-Abs
+                    x : B->B->B, y:B->B |- \z:B.(x z) (y z) : B -> B
+   ________________________________________________________________________________________T-Abs
+                            x : B->B->B |- \y:B->B.\z:B.(x z) (y z) : (B -> B) -> B -> B
+   ________________________________________________________________________________________T-Abs
+                  \x:B->B->B.\y:B->B.\z:B.(x z) (y z) : (B -> B -> B) -> (B -> B) -> B -> B
+
+Ej 2- Retorna un tipo Either ya que la inferencia de tipo puede fallar. Si hubo algún error, se propaga en la
+recursión y se termina devolviendo Left MensajeDeError. Si el tipo evalúa de manera correcta, se devuelve
+Right Tipo. 
+
+El operador (>>=) toma un Either String Type y una función de tipo (Type -> Either String Type).
+Si el valor es un Left x, el operador funciona como la identidad.
+Si es un Right v, devuelve el resultado de aplicar la función argumento a v.
+
+
+Ej 3, 4-
+- Common.hs: LamTerm, Term
+- Parse.y: Anotar el sinónimo en %token, ver asociatividad y precedencia, definir la gramática, agregar el token en el tipo data Token, agregar una entrada en el lexer.
+- Simplytyped.hs: Conversion, Sub, Eval, Infer
+- PrettyPrinter.hs: fv, pp
+
+
+CONSIDERAR CÓMO TESTEAR LAS COSAS.
+
+
+Ej 5 -
+              _________________ T-VAR
+               x : B |- x : B
+      _________________________________T-ABS
+         |- \x : B . x : B -> B
+ ________________________________________T-ASCRIBE               _____________________________ T-VAR
+   |- (\x : B . x) as B -> B : B -> B                                z : B -> B |- z : B -> B     
+____________________________________________________________________________________________________________T-LET
+                                 |- let z = ((\x : B. x) as B -> B) in z : B-> B
+ ____________________________________________________________________________________________________________ T-ASCRIBE
+                                 |- (let z = ((\x : B. x) as B -> B) in z) as B -> B : B -> B
+
+Ej 6- Done, creo.
+
+Ej 7- 
+
+      t1 -> t1'
+_____________________ E-TUPLE1
+(t1, t2) -> (t1', t2)
+
+
+     t2 -> t2'
+_____________________ E-TUPLE2
+(v, t2) -> (v, t2')
+
+
+_____________________ E-FST
+fst (t1, t2) -> t1
+
+
+_____________________ E-SND
+snd (t1, t2) -> t2
+
+
+Ej 8- Con bastantes dudas, pero done.
+
+Ej 9- 
+                                             ________________________________T-VAR
+                                                 x:(B,B) |- x : (B,B)
+___________________________T-UNIT            ________________________________
+    |- unit : Unit                               x:(B,B) |- snd x : B
+___________________________T-ASCRIBE         ________________________________T-ABS
+   |- unit as Unit : Unit                            |-\x:(B,B). snd x : (B,B) -> B
+____________________________________________________________________________T-PAIR
+                   |-(unit as Unit, \x:(B,B). snd x): (Unit, (B,B) -> B)
+____________________________________________________________________________T-FST
+                 |- fst (unit as Unit, \x:(B,B). snd x): Unit
