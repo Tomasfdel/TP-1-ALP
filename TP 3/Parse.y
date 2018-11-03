@@ -65,7 +65,7 @@ Exp     :: { LamTerm }
         | SND Exp                      { LSecond $2 }
         | '(' Exp ',' Exp ')'          { LTuple $2 $4 }        
         | SUC Exp                      { LSucc $2 }
-        | REC Exp Exp Exp              { LR $2 $3 $4 }
+        | REC Atom Atom Exp            { LR $2 $3 $4 }
         | NAbs                         { $1 }
         
 NAbs    :: { LamTerm }
@@ -162,6 +162,7 @@ lexer cont s = case s of
                     (',':cs) -> cont TComma cs
                     (':':cs) -> cont TColon cs
                     ('=':cs) -> cont TEquals cs
+                    ('0':cs) -> cont TZero cs
                     unknown -> \line -> Failed $ "Línea "++(show line)++": No se puede reconocer "++(show $ take 10 unknown)++ "..."
                     where lexVar cs = case span isAlpha cs of
                                            ("B",rest)   -> cont TType rest
@@ -175,7 +176,6 @@ lexer cont s = case s of
                                            ("snd", rest) -> cont TSecond rest
                                            ("succ", rest) -> cont TSuc rest
                                            ("rec", rest) -> cont TRec rest
-                                           ("0", rest) -> cont TZero rest
                                            ("Nat", rest) -> cont TNat rest
                                            (var,rest)   -> cont (TVar var) rest
                           consumirBK anidado cl cont s = case s of

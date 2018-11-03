@@ -59,7 +59,6 @@ eval _ (Lam t u)                 = VLam t u
 eval e (Lam _ u :@: Lam s v)     = eval e (sub 0 (Lam s v) u)
 eval e (Lam t u :@: v)           = let value = eval e v
                                     in eval e (sub 0 (quote value) u)
-eval e (Lam _ u :@: lt)          = eval e (sub 0 lt u)
 eval e (u :@: v)                 = case eval e u of
                                      VLam t u' -> eval e (Lam t u' :@: v)
                                      _         -> error "Error de tipo en run-time, verificar type checker"
@@ -162,24 +161,24 @@ infer' c e (TupleT lt1 lt2) = infer' c e lt1 >>=
                                   (\tlt2 -> ret (Tuple tlt1 tlt2)))
 infer' c e (First lt) = infer' c e lt >>=
                           (\tlt -> case tlt of
-                                     Right (Tuple t1 t2) -> ret t1
-                                     Right t -> tupleError t)
+                                     Tuple t1 t2 -> ret t1
+                                     t -> tupleError t)
 infer' c e (Second lt) = infer' c e lt >>=
                            (\tlt -> case tlt of
-                                      Right (Tuple t1 t2) -> ret t2
-                                      Right t -> tupleError t)
+                                      Tuple t1 t2 -> ret t2
+                                      t -> tupleError t)
 infer' c e  ZeroT = ret Nat
 infer' c e (SuccT lt) = infer' c e lt >>=
                           (\tlt -> case tlt of
-                                     Right Nat -> Right Nat
-                                     Right t -> succError t)
+                                     Nat -> ret Nat
+                                     t -> succError t)
 infer' c e (RT lt1 lt2 lt3) = infer' c e lt1 >>=
                                 (\tlt1 -> infer' c e lt2 >>=
                                   (\tlt2 -> case tlt2 of
-                                              Right (Fun t1A (Fun Nat t1B)) -> if t1A == tlt1 && t1B == tlt1 then infer' c e lt3 >>=
-                                                                                                                    (\tlt3 -> case tlt3 of
-                                                                                                                                Right Nat -> tlt1
-                                                                                                                                Right t3  -> rError2 t3)
-                                                                                                             else rError1 tlt1 (Fun t1A (Fun Nat t1B))
-                                              Right t2 -> rError1 tlt1 t2))
+                                              Fun t1A (Fun Nat t1B) -> if t1A == tlt1 && t1B == tlt1 then infer' c e lt3 >>=
+                                                                                                            (\tlt3 -> case tlt3 of
+                                                                                                                        Nat -> ret tlt1
+                                                                                                                        t3  -> rError2 t3)
+                                                                                                     else rError1 tlt1 (Fun t1A (Fun Nat t1B))
+                                              t2 -> rError1 tlt1 t2))
 ----------------------------------
