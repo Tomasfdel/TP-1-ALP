@@ -67,10 +67,12 @@ eval e (Let lt1 lt2)             = let value = eval e lt1
 eval e (As lt typ)               = eval e lt
 eval e  UnitT                    = VUnit
 eval e (TupleT lt1 lt2)          = VTuple (eval e lt1) (eval e lt2)
-eval e (First (TupleT lt1 lt2))  = eval e lt1
-eval e (First _ )                = error "Error de tipo de run-time, verificar type checker"
-eval e (Second (TupleT lt1 lt2)) = eval e lt2
-eval e (Second _ )               = error "Error de tipo de run-time, verificar type checker"
+eval e (First lt)                = case eval e lt of
+                                     (VTuple v1 v2) -> v1
+                                     _ -> error "Error de tipo de run-time, verificar type checker"
+eval e (Second lt)               = case eval e lt of
+                                     (VTuple v1 v2) -> v2
+                                     _ -> error "Error de tipo de run-time, verificar type checker"
 eval e  ZeroT                    = VNat Zero
 eval e (SuccT lt)                = case eval e lt of
                                      VNat n -> VNat (Succ n)

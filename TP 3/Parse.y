@@ -60,7 +60,7 @@ Defexp  : DEF VAR '=' Exp              { Def $2 $4 }
 Exp     :: { LamTerm }
         : '\\' VAR ':' Type '.' Exp    { Abs $2 $4 $6 }
         | LET VAR '=' Exp IN Exp       { LLet $2 $4 $6 }
-        | Exp AS Type                  { LAs $1 $3}        
+        | Exp AS Type                  { LAs $1 $3 }        
         | FST Exp                      { LFirst $2 }
         | SND Exp                      { LSecond $2 }
         | '(' Exp ',' Exp ')'          { LTuple $2 $4 }        

@@ -45,7 +45,7 @@ pp ii vs (First lt) = text "fst " <>
                       parensIf (isApp lt || isLam lt || isLet lt || isAs lt || isTupleOp lt) (pp ii vs lt)
 pp ii vs (Second lt) = text "snd " <>
                        parensIf (isApp lt || isLam lt || isLet lt || isAs lt || isTupleOp lt) (pp ii vs lt)
-pp ii vs ZeroT = text "0"
+pp ii vs  ZeroT = text "0"
 pp ii vs (SuccT lt) = text "succ " <>
                       parensIf (isLam lt || isApp lt || isLet lt || isAs lt || isTupleOp lt || isNatOp lt) (pp ii vs lt)
 pp ii vs (RT lt1 lt2 lt3) = text "R " <>
