@@ -1,0 +1,4 @@
+def AckAux = \a:Nat -> Nat. \n:Nat. R (a (succ 0)) (\x:Nat. \y:Nat. a x) n
+
+def Ack = \m:Nat. R (\n:Nat. succ n) (\f:Nat->Nat. \y:Nat. AckAux f) m
+

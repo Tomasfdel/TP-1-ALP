@@ -175,7 +175,7 @@ lexer cont s = case s of
                                            ("fst", rest) -> cont TFirst rest
                                            ("snd", rest) -> cont TSecond rest
                                            ("succ", rest) -> cont TSuc rest
-                                           ("rec", rest) -> cont TRec rest
+                                           ("R", rest) -> cont TRec rest
                                            ("Nat", rest) -> cont TNat rest
                                            (var,rest)   -> cont (TVar var) rest
                           consumirBK anidado cl cont s = case s of
