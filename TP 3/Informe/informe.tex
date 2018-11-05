@@ -1,0 +1,609 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{gensymb}
+\usepackage{float}
+\usepackage{color}
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{mathpartir}
+\usepackage{listings}
+\usepackage[spanish,es-tabla]{babel}
+\title{Trabajo Práctico Final}
+\author{Integrantes: Tomás Fernández De Luco y Ignacio Sebastián Moliné}
+\date{5 de noviembre de 2018}
+\topmargin=-2cm
+\oddsidemargin=0cm
+\textheight=24cm
+\textwidth=17cm
+\newcommand*\rfrac[2]{{}^{#1}\!/_{#2}}
+\begin{document}
+\begin{titlepage}
+
+\begin{minipage}{2.6cm}
+\includegraphics[width=\textwidth]{fceia.pdf}
+\end{minipage}
+\hfill
+%
+\begin{minipage}{6cm}
+\begin{center}
+\normalsize{Universidad Nacional de Rosario\\
+Facultad de Ciencias Exactas,\\
+Ingeniería y Agrimensura\\}
+\vspace{0.5cm}
+\large
+Lic. en Cs. de la Computación
+\end{center}
+\end{minipage}
+\hspace{0.5cm}
+\hfill
+\begin{minipage}{2.6cm}
+\includegraphics[width=\textwidth]{unr.pdf}
+\end{minipage}
+
+\vspace{5.5cm}
+
+\begin{center}
+\LARGE{\sc Análisis de Lenguajes de Programación}\\
+\vspace{0.5cm}
+\large{Trabajo Práctico 3}\\
+
+\vspace{5cm}
+
+\large
+Tomás Fernández De Luco F-3443/6\\
+Ignacio Sebastián Moline M-6466/1\\
+
+\vspace*{0.5cm}
+\small{5 de noviembre de 2018}
+
+\makeatletter
+\def\@seccntformat#1{%
+  \expandafter\ifx\csname c@#1\endcsname\c@section\else
+  \csname the#1\endcsname\quad
+  \fi}
+\makeatother
+
+\lstdefinestyle{myCustom}{
+	language=Haskell,
+	numbersep=10pt,
+	tabsize=2,
+	showspaces=false,
+	showstringspaces=false,
+	keepspaces=true,
+	frame=single,
+	commentstyle=\color{blue}
+}
+
+
+\end{center}
+\end{titlepage}
+\lstset{basicstyle=\small,style=myCustom}
+	\newpage
+	
+	\section*{Ejercicio 1}	
+	Definiremos los siguientes entornos: \\
+		$\Gamma_{1}$ = x : B$\rightarrow$B$\rightarrow$B \\
+	    $\Gamma_{2}$ = x : B$\rightarrow$B$\rightarrow$B, y : B$\rightarrow$B \\
+	    $\Gamma_{3}$ = x : B$\rightarrow$B$\rightarrow$B, y : B$\rightarrow$B, z : B \\
+	\\Primero haremos las siguientes derivaciones de tipo: $\Gamma_{3}$ $\vdash$ (x z) : B $\rightarrow$ B y $\Gamma_{3}$ $\vdash$ (y z) : B.
+
+
+\[\inferrule* [right=T-App]
+{\inferrule* [right=T-Var]
+	{ }
+	{\Gamma_{3} \vdash x : B \rightarrow B \rightarrow B}
+	\\
+	\inferrule* [right=T-Var]
+	{ }
+	{\Gamma_{3} \vdash z : B}
+}
+{\Gamma_{3} \vdash (x$ $z) : B \rightarrow B}
+\]
+
+\[\inferrule* [right=T-App]
+{\inferrule* [right=T-Var]
+	{ }
+	{\Gamma_{3} \vdash y : B \rightarrow B}
+	\\
+	\inferrule* [right=T-Var]
+	{ }
+	{\Gamma_{3} \vdash z : B }
+}
+{\Gamma_{3} \vdash (y$ $z) : B}
+\]
+\\Procederemos dar una derivación de tipo para el término S, teniendo los resultados de sus hojas demostradas previamente:
+\[
+\inferrule* [right=T-Abs]
+{\inferrule* [right=T-Abs] 
+	{\inferrule* [right=T-Abs]
+		{\inferrule* [right=T-App]
+			{\inferrule* []
+				{}
+				{\Gamma_{3} \vdash (x$ $z) : B \rightarrow B}
+			\\
+			\inferrule* []
+				{}
+				{\Gamma_{3} \vdash (y$ $z) : B}
+			}
+			{\Gamma_{3} \vdash (x$ $z)$ $(y$ $z) : B}
+		}
+		{\Gamma_{2} \vdash \lambda z:B.(x$ $z)$ $(y$ $z) : B \rightarrow B }
+	}
+	{\Gamma_{1} \vdash \lambda y:B \rightarrow B.\lambda z:B.(x$ $z)$ $(y$ $z) :  (B \rightarrow B) \rightarrow B \rightarrow B }
+}
+{\vdash \lambda x:B \rightarrow B \rightarrow B.\lambda y:B \rightarrow B.\lambda z:B.(x$ $z)$ $(y$ $z) : (B \rightarrow B \rightarrow B) \rightarrow (B \rightarrow B) \rightarrow B \rightarrow B}
+\]
+	\section*{Ejercicio 2}
+	La función \textit{infer} retorna un tipo \textit{Either} ya que la inferencia de tipo puede fallar. Si hubo algún error, se propaga en la recursión y se termina devolviendo \textit{Left MensajeDeError}. Si el tipo evalúa de manera correcta, se devuelve \textit{Right Tipo}.
+	
+	El operador $(>>=)$ toma un argumento de tipo \textit{Either String Type} y una función de tipo \textit{(Type $\rightarrow$ Either String Type)}. Si el valor del primer argumento es un \textit{Left x}, el operador funciona como la identidad. Si es un \textit{Right v}, devuelve el resultado de aplicar la función argumento a $v$. 
+	
+	
+	\newpage
+	\section*{Ejercicio 3}
+	Los cambios realizados en código son los siguientes:\\
+	\textbf{Common.hs:} Agregamos LLet a LamTerm y Let a Term.
+	\begin{lstlisting}
+	data LamTerm  =  ...
+	|  LLet String LamTerm LamTerm
+	\end{lstlisting}
+	\begin{lstlisting}
+	data Term  = ...
+	| Let Term Term
+	\end{lstlisting}
+	\textbf{Parse.y:} Agregamos los tokens TLet y TIn al listado. 
+	\lstinputlisting[language=Haskell, firstline=29, lastline=30]{Parse.y}
+	Los pusimos al mismo nivel de la abstracción en el listado de precedencias.
+	\lstinputlisting[language=Haskell, firstline=42, lastline=45]{Parse.y}
+	Agregamos una regla para Exp en la gramática. 
+	\lstinputlisting[language=Haskell, firstline=60, lastline=62]{Parse.y}
+	Agregamos TLet y TIn al tipo de dato de los tokens. 
+	\begin{lstlisting}
+	data Token = ...
+	| TLet
+	| TIn
+	\end{lstlisting}
+	Agregamos los patterns para $"let"$ e $"in"$ en el lexer. 	
+	\begin{lstlisting}
+	lexer cont s = case s of
+	...
+			("let", rest) -> cont TLet rest
+			("in", rest) -> cont TIn rest
+	\end{lstlisting}
+	\textbf{Simplytyped.hs:} Agregamos un pattern a conversion'.
+	\lstinputlisting[language=Haskell, firstline=24, lastline=24]{Simplytyped.hs}
+	Agregamos un pattern a sub.
+	\lstinputlisting[language=Haskell, firstline=44, lastline=44]{Simplytyped.hs}
+	Agregamos un pattern a eval.
+	\lstinputlisting[language=Haskell, firstline=65, lastline=66]{Simplytyped.hs}
+	Agregamos un pattern a infer'.
+	\lstinputlisting[language=Haskell, firstline=160, lastline=158]{Simplytyped.hs}
+	Hicimos un cambio en eval (Lam t u :@: v), para evitar tener que agregar casos adicionales cuando se definan nuevos valores.
+	\lstinputlisting[language=Haskell, firstline=60, lastline=61]{Simplytyped.hs}
+	\textbf{Prettyprinter.hs:} Agregamos un pattern a fv.
+	\lstinputlisting[language=Haskell, firstline=114, lastline=105]{Prettyprinter.hs}
+	Agregamos la funcion isLet.
+	\lstinputlisting[language=Haskell, firstline=73, lastline=75]{Prettyprinter.hs}
+	Agregamos un pattern a pp.
+	\lstinputlisting[language=Haskell, firstline=31, lastline=38]{Prettyprinter.hs}
+	\newpage
+	
+	\section*{Ejercicio 4}
+	Los cambios realizados en código son los siguientes:\\
+	\textbf{Common.hs:} Agregamos LAs a LamTerm y As a Term.
+	\begin{lstlisting}
+	data LamTerm  =  ...
+	|  LAs LamTerm Type
+	\end{lstlisting}
+	\begin{lstlisting}
+	data Term  = ...
+	| As Term Type
+	\end{lstlisting}
+	\textbf{Parse.y:} Agregamos los tokens TAs al listado. 
+	\lstinputlisting[language=Haskell, firstline=31, lastline=31]{Parse.y}
+	Lo pusimos en un nivel mayor que la abstracción en el listado de precedencias. 
+	\lstinputlisting[language=Haskell, firstline=42, lastline=46]{Parse.y}
+	Agregamos una regla para Exp en la gramática. 
+	\lstinputlisting[language=Haskell, firstline=60, lastline=63]{Parse.y}
+	Agregamos TAs al tipo de dato de los tokens. 
+	\begin{lstlisting}
+	data Token = ...
+	| TAs
+	\end{lstlisting}
+	Agregamos un pattern para $"as"$ en el lexer.
+	\begin{lstlisting}
+	lexer cont s = case s of
+	...
+	    ("as", rest) -> cont TAs rest\end{lstlisting}
+	\textbf{Simplytyped.hs:} Agregamos un pattern a conversion'.
+	\lstinputlisting[language=Haskell, firstline=25, lastline=24]{Simplytyped.hs}
+	Agregamos un pattern a sub.
+	\lstinputlisting[language=Haskell, firstline=45, lastline=44]{Simplytyped.hs}
+	Agregamos un pattern a eval.
+	\lstinputlisting[language=Haskell, firstline=67, lastline=66]{Simplytyped.hs}
+	Agregamos un pattern a infer'.
+	\lstinputlisting[language=Haskell, firstline=161, lastline=163]{Simplytyped.hs}
+	\textbf{Prettyprinter.hs:} Agregamos un pattern a fv.
+	\lstinputlisting[language=Haskell, firstline=115, lastline=105]{Prettyprinter.hs}
+	Agregamos la funcion isAs.
+	\lstinputlisting[language=Haskell, firstline=77, lastline=79]{Prettyprinter.hs}
+	Agregamos un pattern a pp.
+	\lstinputlisting[language=Haskell, firstline=39, lastline=42]{Prettyprinter.hs}
+	\newpage
+	\section*{Ejercicio 5}
+	Dado el término: (let z = ((x : B: x) as B $\rightarrow$ B) in z) as B $\rightarrow$ B
+	, su árbol de derivación de tipo es:
+	
+	\[\inferrule*[right=T-Ascribe]
+		{\inferrule* [right=T-Let]
+			{\inferrule* [right=T-Ascribe]
+				{\inferrule* [right=T-Abs]
+					{\inferrule* [right=T-Var]
+						{ }
+						{x : B \vdash x : B}}
+					{\vdash \lambda x : B .$ $x : B \rightarrow B} }
+				{\vdash (\lambda x : B .$ x$)$ $as$ $B \rightarrow B : B \rightarrow B}
+			\\
+			\inferrule* [right=T-Var]
+				{ }
+				{z : B \rightarrow B \vdash z : B \rightarrow B}
+			}
+			{\vdash let$ $z = ((\lambda x : B$.$ x)$ $as$ $B \rightarrow B)$ $in$ $z : B \rightarrow B}
+		}
+		{ \vdash (let$ $z = ((\lambda x : B$.$ x)$ $as$ $B \rightarrow B)$ $in$ $z)$ $as$ $B \rightarrow B : B \rightarrow B }	
+	\]
+	
+	
+	\section*{Ejercicio 6}
+	Los cambios realizados en código son los siguientes:\\
+	\textbf{Common.hs:} Agregamos Unit a Type, LUnit a LamTerm, UnitT a Term y VUnit a Value.
+	\begin{lstlisting}
+	data Type = ...
+	| Unit
+	\end{lstlisting}
+	\begin{lstlisting}
+	data LamTerm  =  ...
+	|  LUnit
+	\end{lstlisting}
+	\begin{lstlisting}
+	data Term  = ...
+	| UnitT
+	\end{lstlisting}
+	\begin{lstlisting}
+	data Value  = ...
+	| VUnit 
+	\end{lstlisting}
+	\textbf{Parse.y:} Agregamos los tokens TVUnit y TUnit al listado.
+	\lstinputlisting[language=Haskell, firstline=32, lastline=33]{Parse.y}
+	Agregamos VUNIT a los Atoms y UNIT a los tipos, dentro de la gramática. 
+	\lstinputlisting[language=Haskell, firstline=75, lastline=77]{Parse.y}
+	\lstinputlisting[language=Haskell, firstline=81, lastline=83]{Parse.y}
+	Agregamos TVUnit y TUnit al tipo de dato de los tokens.
+	\begin{lstlisting}
+	data Token = ...
+	| TVUnit
+	| TUnit
+	\end{lstlisting}
+	Agregamos los patterns para $"unit"$ y $"Unit"$ en el lexer.
+	\begin{lstlisting}
+	lexer cont s = case s of
+	...
+	("unit", rest) -> cont TVUnit rest
+	("Unit", rest) -> cont TUnit rest	\end{lstlisting}
+	\textbf{Simplytyped.hs:} Agregamos un pattern a conversion'.
+	\lstinputlisting[language=Haskell, firstline=26, lastline=24]{Simplytyped.hs}
+	Agregamos un pattern a sub.
+	\lstinputlisting[language=Haskell, firstline=46, lastline=44]{Simplytyped.hs}
+	Agregamos un pattern a eval.
+	\lstinputlisting[language=Haskell, firstline=68, lastline=66]{Simplytyped.hs}
+	Agregamos un pattern a infer'.
+	\lstinputlisting[language=Haskell, firstline=164, lastline=158]{Simplytyped.hs}
+	Agregamos un pattern a quote.
+	\lstinputlisting[language=Haskell, firstline=92, lastline=91]{Simplytyped.hs}
+	\textbf{Prettyprinter.hs:} Agregamos un pattern a fv.
+	\lstinputlisting[language=Haskell, firstline=116, lastline=105]{Prettyprinter.hs}
+	Agregamos un pattern a printType
+	\lstinputlisting[language=Haskell, firstline=97, lastline=79]{Prettyprinter.hs}
+	Agregamos un pattern a pp.
+	\lstinputlisting[language=Haskell, firstline=43, lastline=42]{Prettyprinter.hs}
+	\newpage
+	\section*{Ejercicio 7}
+	La relación de evaluación extendida es:
+	\[
+	\inferrule* [right=E-Tuple1]
+	{t1 \rightarrow t1' }
+	{(t1,t2) \rightarrow (t1',t2)}
+	\]
+	
+	\[
+	\inferrule* [right=E-Tuple2]
+	{t2 \rightarrow t2' }
+	{(v,t2) \rightarrow (v,t2')}
+	\]
+	
+	\[
+		\inferrule* [right=E-Fst]
+		{\inferrule* [] {}{  }}
+		{fst(v1,v2) \rightarrow v1 }
+	\]
+	
+	\[
+		\inferrule* [right=E-Snd]
+		{\inferrule* [] {}{    }}
+		{snd(v1,v2) \rightarrow v2 }
+	\] \\
+	
+	
+	\section*{Ejercicio 8}
+	Los cambios realizados en código son los siguientes:\\
+	\textbf{Common.hs:} Agregamos Tuple a Type; LTuple, LFirst y LSecond a LamTerm; TupleT, First y Second a Term, VTuple a Value.
+	\begin{lstlisting}
+	data Type = ...
+	| Tuple Type Type
+	\end{lstlisting}
+	\begin{lstlisting}
+	data LamTerm  =  ...
+	|  LTuple LamTerm LamTerm
+	|  LFirst LamTerm
+	|  LSecond LamTerm
+	\end{lstlisting}
+	\begin{lstlisting}
+	data Term  = ...
+	| TupleT Term Term
+	| First Term
+	| Second Term
+	\end{lstlisting}
+	\begin{lstlisting}
+	data Value  = ...
+	| VTuple Value Value
+	\end{lstlisting}
+	\textbf{Parse.y:} Agregamos los tokens TFirst y TSecond al listado.
+	\lstinputlisting[language=Haskell, firstline=34, lastline=35]{Parse.y}
+	Los pusimos en un nivel mayor a AS en el listado de precedencias. 
+	\lstinputlisting[language=Haskell, firstline=42, lastline=49]{Parse.y}
+	Agregamos reglas para FST y SND en la gramática para las expresiones, y una regla para construcción de tuplas.
+	\lstinputlisting[language=Haskell, firstline=60, lastline=66]{Parse.y}
+	\begin{lstlisting}
+	Type    : ...
+	| '(' Type ',' Type ')'        { Tuple $2 $4 }
+	\end{lstlisting}
+	Agregamos TFirst y TSecond al tipo de dato de los tokens. 
+	\begin{lstlisting}
+	data Token = ...
+	| TFirst
+	| TSecond	
+	\end{lstlisting}
+	Agregamos los patterns para $"fst"$ y $"snd"$ en el lexer.
+	\begin{lstlisting}
+	lexer cont s = case s of
+	...
+	("fst", rest) -> cont TFirst rest
+	("snd", rest) -> cont TSecond rest\end{lstlisting}
+	\textbf{Simplytyped.hs:} Agregamos patterns a conversion'.
+	\lstinputlisting[language=Haskell, firstline=27, lastline=29]{Simplytyped.hs}
+	Agregamos patterns a sub.
+	\lstinputlisting[language=Haskell, firstline=47, lastline=49]{Simplytyped.hs}
+	Agregamos patterns a eval.
+	\lstinputlisting[language=Haskell, firstline=69, lastline=75]{Simplytyped.hs}
+	Agregamos patterns a infer'.
+	\lstinputlisting[language=Haskell, firstline=165, lastline=175]{Simplytyped.hs}
+	\newpage
+	Agregamos un pattern a quote.
+	\lstinputlisting[language=Haskell, firstline=93, lastline=91]{Simplytyped.hs}
+	Agregamos la función tuppleError.
+	\begin{lstlisting}
+	tupleError :: Type -> Either String Type
+	tupleError t = err ("Función de tupla aplicado a un tipo " ++ 
+										render (printType t) ++ ".") 	
+	\end{lstlisting}
+	\textbf{Prettyprinter.hs:} Agregamos patterns a fv.
+	\lstinputlisting[language=Haskell, firstline=117, lastline=119]{Prettyprinter.hs}
+	Agregamos un pattern a printType.
+	\lstinputlisting[language=Haskell, firstline=98, lastline=102]{Prettyprinter.hs}
+	Agregamos patterns a pp.
+	\lstinputlisting[language=Haskell, firstline=44, lastline=52]{Prettyprinter.hs}
+	Definimos isTupleOp.
+	\lstinputlisting[language=Haskell, firstline=81, lastline=84]{Prettyprinter.hs}
+	\newpage
+	\section*{Ejercicio 9}
+	
+	 El árbol de derivación de tipo para el término $fst$ $(unit$ $as$ $Unit,$ $\lambda$$x$ : $(B, B)$. $snd$ $x)$ es:
+	
+		\[\inferrule*[right=T-Fst]
+	{\inferrule* [right=T-Pair]
+		{\inferrule* [right=T-Ascribe]
+			{\inferrule* [right=T-Unit]
+				{ }
+				{\vdash unit : Unit }
+			}
+			{\vdash $unit as Unit$ : Unit}
+		\\
+		\inferrule* [right=T-Abs]
+			{\inferrule* [right=T-Snd]
+				{\inferrule* [right=T-Var]
+					{ }
+					{x : (B,B) \vdash x : (B,B)}}
+				{x : (B,B) \vdash $ snd x$ : B} }
+			{\vdash \lambda x : (B,B). $ snd x $ : (B,B) \rightarrow B}
+		}
+		{\vdash ($unit as Unit$, \lambda x: (B,B).$ $snd$ $x) : (Unit, (B,B) \rightarrow B)}
+	}
+	{ \vdash fst$ $($unit as Unit$, \lambda x: (B,B).$ $snd$ $x): Unit }	
+	\]
+	
+	\section*{Ejercicio 10}
+	Los cambios realizados en código son los siguientes:\\
+	\textbf{Common.hs:} Agregamos Nat a Type; LZero, LSucc y LR a LamTerm; ZeroT, SuccT y RT a Term, VNat a Value. Agregamos el tipo de datos Natural.
+	\begin{lstlisting}
+	data Type = ...
+	| Nat
+	\end{lstlisting}
+	\begin{lstlisting}
+	data LamTerm  =  ...
+	|  LZero
+	|  LSucc LamTerm
+	|  LR LamTerm LamTerm LamTerm
+	\end{lstlisting}
+	\begin{lstlisting}
+	data Term  = ...
+	| ZeroT
+	| SuccT Term
+	| RT Term Term Term
+	\end{lstlisting}
+	\begin{lstlisting}
+	data Value  = ...
+	| VNat Natural
+	\end{lstlisting}
+	\begin{lstlisting}
+	data Natural = Zero
+	| Succ Natural
+	\end{lstlisting}	
+	\textbf{Parse.y:} Agregamos los tokens TSuc, TRec, TZero y TNat al listado.	
+	\lstinputlisting[language=Haskell, firstline=36, lastline=39]{Parse.y}
+	 Los pusimos en orden correspondiente en un nivel mayor a AS y menor de FST y SND en el listado de precedencias. 
+	\lstinputlisting[language=Haskell, firstline=42, lastline=49]{Parse.y}
+	Agregamos reglas para SUC y REC en la gramática para las expresiones, ZERO a los átomos y NAT a los tipos. 	
+	\begin{lstlisting}
+	Exp     :: { LamTerm }
+	...
+	| SUC Exp                      { LSucc $2 }
+	| REC Atom Atom Exp            { LR $2 $3 $4 }
+	\end{lstlisting}
+	\begin{lstlisting}
+	Atom    :: { LamTerm }
+	...
+	| ZERO                         { LZero }
+	\end{lstlisting}
+	\begin{lstlisting}
+	Type    : TYPE                         { Base }
+	...
+	| NAT                          { Nat }
+	\end{lstlisting}
+	Agregamos TSuc, TRec, TZero y TNat al tipo de dato de los tokens. 
+	\begin{lstlisting}
+	data Token = ...
+	| TSuc
+	| TRec
+	| TZero
+	| TNat
+	\end{lstlisting}
+	Agregamos los patterns para $'0'$, $"succ"$, $"R"$ y $"Nat"$ en el lexer.
+	\begin{lstlisting}
+	lexer cont s = case s of
+	...
+	('0':cs) -> cont TZero cs
+	...
+	("succ", rest) -> cont TSuc rest
+	("R", rest) -> cont TRec rest
+	("Nat", rest) -> cont TNat rest
+	\end{lstlisting}
+	\textbf{Simplytyped.hs:} Agregamos patterns a conversion'.
+	
+	\begin{lstlisting}
+	conversion' b  LZero = ZeroT
+	conversion' b (LSucc lt) = SuccT (conversion' b lt)
+	conversion' b (LR lt1 lt2 lt3) = RT (conversion' b lt1) (conversion' b lt2) 
+											(conversion' b lt3)
+	\end{lstlisting}
+	
+	Agregamos patterns a sub.
+	\lstinputlisting[language=Haskell, firstline=50, lastline=52]{Simplytyped.hs}
+	Agregamos patterns a eval.
+	\begin{lstlisting}
+	eval e  ZeroT                    = VNat Zero
+	eval e (SuccT lt)                = case eval e lt of
+	VNat n -> VNat (Succ n)
+	_      -> error "Error de tipo de run-time, verificar type checker"
+	eval e (RT lt1 lt2 lt3)          = case eval e lt3 of
+	VNat Zero     -> eval e lt1
+	VNat (Succ n) -> eval e ((lt2 :@: (quote (eval e (RT lt1 lt2 (quote (VNat n))))))
+														 :@: (quote (VNat n)))
+	\end{lstlisting}
+	\newpage
+	Agregamos patterns a infer'.
+	\begin{lstlisting}
+	infer' c e  ZeroT = ret Nat
+	infer' c e (SuccT lt) = infer' c e lt >>=
+		(\tlt -> case tlt of
+			Nat -> ret Nat
+			t -> succError t)
+	infer' c e (RT lt1 lt2 lt3) = infer' c e lt1 >>=
+				(\tlt1 -> infer' c e lt2 >>=
+					(\tlt2 -> case tlt2 of
+						Fun t1A (Fun Nat t1B) -> if t1A == tlt1 && t1B == tlt1 then infer' c e lt3 >>=
+							(\tlt3 -> case tlt3 of
+								Nat -> ret tlt1
+								t3  -> rError2 t3)
+							else rError1 tlt1 (Fun t1A (Fun Nat t1B))
+						t2 -> rError1 tlt1 t2))
+	\end{lstlisting}
+	Agregamos patterns a quote.
+	\lstinputlisting[language=Haskell, firstline=94, lastline=95]{Simplytyped.hs}
+	Agregamos succError, rError1, rError2 	
+	\begin{lstlisting}
+	succError :: Type -> Either String Type
+	succError t = err ("Sucesor aplicado a un tipo " ++ render (printType t) ++ ".")
+	
+	rError1 :: Type -> Type -> Either String Type
+	rError1 t1 t2 = err ("Error de tipado en operador R. Tipo del primer argumento: " ++
+		render (printType t1) ++ ". Tipo del segundo argumento: " ++  
+		render (printType t2) ++ ".")
+	
+	rError2 :: Type -> Either String Type
+	rError2 t = err ("Operador R con tercer argumento de tipo " ++
+		render (printType t) ++ " cuando deberia ser Nat.")
+	\end{lstlisting}
+	\textbf{Prettyprinter.hs:} Agregamos patterns a fv.
+	\lstinputlisting[language=Haskell, firstline=120, lastline=122]{Prettyprinter.hs}
+	Agregamos un pattern a printType
+	\lstinputlisting[language=Haskell, firstline=103, lastline=102]{Prettyprinter.hs}
+	Agregamos patterns a pp.
+	\begin{lstlisting}
+	pp ii vs  ZeroT = text "0"
+	pp ii vs (SuccT lt) = 
+		text "succ " <>
+		parensIf (isLam lt || isApp lt || isLet lt || isAs lt || isTupleOp lt || isNatOp lt) 
+			(pp ii vs lt)
+	pp ii vs (RT lt1 lt2 lt3) = 
+		text "R " <>
+		sep [parensIf (isLam lt1 || isApp lt1 || isLet lt1 || isAs lt1) 
+			(pp ii vs lt1), 
+		nest 1 (parensIf (isLam lt2 || isApp lt2 || isLet lt2 || isAs lt2) 
+			(pp ii vs lt2)), 
+		nest 1 (parensIf (isLam lt3 || isApp lt3 || isLet lt3 || isAs lt3)
+	\end{lstlisting} 
+	\newpage
+	Definimos isNatOp
+	\lstinputlisting[language=Haskell, firstline=86, lastline=89]{Prettyprinter.hs}
+	\newpage
+	\section*{Ejercicio 11}
+
+	La función de Ackermann es: \\
+	Ack: N $\rightarrow$ N $\rightarrow$ N \\
+	Ack 0 n = n + 1 \\
+	Ack m 0 = Ack (m − 1) 1 \\
+	Ack m n = Ack (m − 1) (Ack m (n − 1)) \\
+	
+	A grandes rasgos, los casos dependen de si el primer argumento es nulo. Si lo es, existe un caso base. Si no, hay dos posibilidades para llamadas recursivas en función de si el segundo argumento es nulo. Entonces, creemos que el patrón de Ack se puede captar mediante dos funciones que se definan a partir del operador R. De esta forma, se plantean las siguientes definiciones:
+	\\
+	\\
+	AckAux: (N $\rightarrow$ N) $\rightarrow$ N $\rightarrow$ N\\
+	AckAux f 0 = f 1\\
+	AckAux f n = f (AckAux f (n - 1))\\
+	\\
+	Ack: N $\rightarrow$ N $\rightarrow$ N\\
+	Ack 0 = succ\\
+	Ack m = AckAux (Ack (m - 1))\\
+	\\
+	La función Ack definida de esta forma se encarga de definir qué comportamiento tener con respecto al segundo argumento en función de si el primero es nulo o no. Si no lo es, se utiliza la función AckAux para que defina cuál será el segundo argumento de la llamada recursiva. Teniendo las definiciones, ahora se puede expresar a ambas funciones con el operador R:
+	\\
+	\\
+	def AckAux = \lambda $a : Nat$ $\rightarrow$ $Nat.$ \lambda $n : Nat.$ $R (a (succ 0)) $ (\lambda $x : Nat.$ \lambda $y : Nat.$ $a x$) $ n$ \\ \\
+	def Ack = \lambda m:Nat. R$ $(\lambda n:Nat. $succ n$)$ $(\lambda f:Nat $\rightarrow$ Nat. \lambda y:Nat. AckAux$ $f)$ $m\\
+	\\
+	$Para ambas se tuvo que definir una función de recursión que tome dos valores e ignore el segundo, ya que el valor actual del argumento no es necesario en el cálculo del resultado, sólo lo que devuelva la llamada recursiva.$
+
+		\newpage
+\end{document}

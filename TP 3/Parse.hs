@@ -8,7 +8,7 @@ import qualified Data.Bits as Bits
 import Control.Applicative(Applicative(..))
 import Control.Monad (ap)
 
--- parser produced by Happy Version 1.19.9
+-- parser produced by Happy Version 1.19.8
 
 data HappyAbsSyn t6 t7 t11 t12
 	= HappyTerminal (Token)
@@ -786,12 +786,7 @@ term_parse s = term s 1
 {-# LINE 1 "templates/GenericTemplate.hs" #-}
 {-# LINE 1 "<built-in>" #-}
 {-# LINE 1 "<command-line>" #-}
-
-
-
-
-
-
+{-# LINE 8 "<command-line>" #-}
 # 1 "/usr/include/stdc-predef.h" 1 3 4
 
 # 17 "/usr/include/stdc-predef.h" 3 4
@@ -838,8 +833,11 @@ term_parse s = term s 1
 
 
 
-{-# LINE 6 "<command-line>" #-}
-{-# LINE 1 "/opt/ghc/7.10.3/lib/ghc-7.10.3/include/ghcversion.h" #-}
+
+
+
+{-# LINE 8 "<command-line>" #-}
+{-# LINE 1 "/usr/lib/ghc/include/ghcversion.h" #-}
 
 
 
@@ -857,7 +855,165 @@ term_parse s = term s 1
 
 
 
-{-# LINE 6 "<command-line>" #-}
+{-# LINE 8 "<command-line>" #-}
+{-# LINE 1 "/tmp/ghc8814_0/ghc_2.h" #-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{-# LINE 8 "<command-line>" #-}
 {-# LINE 1 "templates/GenericTemplate.hs" #-}
 -- Id: GenericTemplate.hs,v 1.26 2005/01/14 14:47:22 simonmar Exp 
 
