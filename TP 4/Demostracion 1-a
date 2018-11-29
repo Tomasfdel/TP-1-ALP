@@ -1,0 +1,72 @@
+newtype State a = State {runState :: Env -> (a, Env)}
+ 
+instance Monad State where
+    return x = State (\s -> (x, s))
+    m >>= f = State (\s -> let (v, s') = runState m s
+                           in runState (f v) s')
+ 
+-- return y >>= f = 
+return y >>= f =                                               {Definición de return}
+State (\s -> (y, s)) >>= f =                                   {Definición de >>=}
+State (\s -> let (v, s') = runState (State (\s -> (y, s))) s
+              in runState (f v) s') =                          {Definición de runState}*
+State (\s -> let (v, s') = (\s -> (y, s)) s
+              in runState (f v) s') =                          {Aplicación de función anónima}*
+State (\s -> let (v, s') = (y, s)
+              in runState (f v) s') =                          {Sustitución de let}*
+State (\s -> runState (f y) s) =                               {eta-reducción}*
+State (runState (f y)) =                                       {Definición de runState}*
+f y
+
+-- m >>= return = m
+m >>= return =                                                 {Definición de >>=}
+State (\s -> let (v, s') = runState m s 
+              in runstate (return v) s') =                     {Definición de return}
+State (\s -> let (v, s') = runState m s 
+              in runstate (State (\s -> (v, s))) s') =         {Definición de runState}
+State (\s -> let (v, s') = runState m s 
+              in (\s -> (v, s)) s') =                          {Aplicación de función anónima}*
+State (\s -> let (v, s') = runState m s 
+              in (v, s')) =                                    {Sustitución de let}*
+State (\s -> runState m s) =                                   {eta-reducción}
+State (runState m) =                                           {Definición de runState}
+m
+
+-- (m >>= f) >>= g = m >>= (\x -> f x >>= g)
+(m >>= f) >>= g =                                              {Definición de >>=}
+(State (\s -> let (v, s') = runState m s 
+               in runState (f v) s')) >>= g =                  {Definición de >>=}
+State (\s -> let (v, s') = runState (State (\s -> let (v, s') = runState m s 
+                                                   in runState (f v) s')) s 
+              in runState (g v) s') =                          {Definición de runState} 
+State (\s -> let (v, s') = (\s -> let (v, s') = runState m s 
+                                   in runState (f v) s')) s 
+              in runState (g v) s') =                          {Aplicación de función anónima}* 
+State (\s -> let (v, s') = (let (v, s') = runState m s 
+                             in runState (f v) s'))
+              in runState (g v) s') =                          {Reescritura de let}* 
+State (\s -> let (v, s')  = runState m s 
+                 (w, s'') = runState (f v) s'
+              in runState (g w) s'')
+
+ 
+m >>= (\x -> f x >>= g) =                                      {Definición de >>=}
+State (\s -> let (v, s') = runState m s 
+              in runState ((\x -> f x >>= g) x) s') =          {Aplicación de función anónima}*
+State (\s -> let (v, s') = runState m s 
+              in runState (f x >>= g) s') =                    {Definición de >>=}*
+State (\s -> let (v, s') = runState m s 
+              in runState (State (\s -> let (v, s') = runState (f x) s
+                                         in runState (g v) s')) s') =   {Definición de runState}*
+State (\s -> let (v, s') = runState m s 
+              in (\s -> let (v, s') = runState (f x) s
+                         in runState (g v) s') s') =           {Aplicación de función anónima}*
+State (\s -> let (v, s') = runState m s 
+              in (let (v, s') = runState (f x) s'
+                   in runState (g v) s')) =                    {Reescritura de let}*
+State (\s -> let (v, s')  = runState m s 
+                 (w, s'') = runState (f x) s'
+              in runState (g w) s'')
+              
+              
+
