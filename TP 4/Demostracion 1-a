@@ -5,68 +5,102 @@ instance Monad State where
     m >>= f = State (\s -> let (v, s') = runState m s
                            in runState (f v) s')
  
--- return y >>= f = 
-return y >>= f =                                               {Definición de return}
-State (\s -> (y, s)) >>= f =                                   {Definición de >>=}
+-- Monad 1
+return y >>= f =
+-- {Definicion de return}
+State (\s -> (y, s)) >>= f =
+-- {Definicion de >>=}
 State (\s -> let (v, s') = runState (State (\s -> (y, s))) s
-              in runState (f v) s') =                          {Definición de runState}*
+              in runState (f v) s') =                          
+-- {Definicion de runState}
 State (\s -> let (v, s') = (\s -> (y, s)) s
-              in runState (f v) s') =                          {Aplicación de función anónima}*
+              in runState (f v) s') =                          
+-- {Aplicacion de funcion anonima}
 State (\s -> let (v, s') = (y, s)
-              in runState (f v) s') =                          {Sustitución de let}*
-State (\s -> runState (f y) s) =                               {eta-reducción}*
-State (runState (f y)) =                                       {Definición de runState}*
+              in runState (f v) s') =                          
+-- {Sustitucion de let}
+State (\s -> runState (f y) s) =                               
+-- {Eta-reduccion}
+State (runState (f y)) =                                       
+-- {Sea x = State z. Luego, State (runState x) = State z = x}
+-- {Entonces, la composicion de State y runState es la identidad}
 f y
 
--- m >>= return = m
-m >>= return =                                                 {Definición de >>=}
+-- Monad 2
+m >>= return =                                                 
+-- {Definicion de >>=}
 State (\s -> let (v, s') = runState m s 
-              in runstate (return v) s') =                     {Definición de return}
+              in runstate (return v) s') =                     
+-- {Definicion de return}
 State (\s -> let (v, s') = runState m s 
-              in runstate (State (\s -> (v, s))) s') =         {Definición de runState}
+              in runstate (State (\s -> (v, s))) s') =         
+-- {Definicion de runState}
 State (\s -> let (v, s') = runState m s 
-              in (\s -> (v, s)) s') =                          {Aplicación de función anónima}*
+              in (\s -> (v, s)) s') =                          
+-- {Aplicacion de funcion anonima}
 State (\s -> let (v, s') = runState m s 
-              in (v, s')) =                                    {Sustitución de let}*
-State (\s -> runState m s) =                                   {eta-reducción}
-State (runState m) =                                           {Definición de runState}
+              in (v, s')) =                                    
+-- {Sustitucion de let}
+State (\s -> runState m s) =                                   
+--{Eta-reduccion}
+State (runState m) =                                           
+-- {La composicion de State y runState es la identidad}
 m
 
--- (m >>= f) >>= g = m >>= (\x -> f x >>= g)
-(m >>= f) >>= g =                                              {Definición de >>=}
+-- Monad 3
+(m >>= f) >>= g =                                              
+-- {Definicion de >>=}
 (State (\s -> let (v, s') = runState m s 
-               in runState (f v) s')) >>= g =                  {Definición de >>=}
+               in runState (f v) s')) >>= g =                  
+-- {Definicion de >>=}
 State (\s -> let (v, s') = runState (State (\s -> let (v, s') = runState m s 
                                                    in runState (f v) s')) s 
-              in runState (g v) s') =                          {Definición de runState} 
+              in runState (g v) s') =                          
+-- {Definicion de runState} 
 State (\s -> let (v, s') = (\s -> let (v, s') = runState m s 
                                    in runState (f v) s')) s 
-              in runState (g v) s') =                          {Aplicación de función anónima}* 
+              in runState (g v) s') =                          
+-- {Aplicacion de funcion anonima}
 State (\s -> let (v, s') = (let (v, s') = runState m s 
-                             in runState (f v) s'))
-              in runState (g v) s') =                          {Reescritura de let}* 
+                             in runState (f v) s')
+              in runState (g v) s') =                          
+-- {Se reescribe el let de la siguiente forma:  
+-- let a = (let b = c in f(b)) in g(a)
+-- let b = c
+--     a = f(b)
+--  in g(a)}
 State (\s -> let (v, s')  = runState m s 
                  (w, s'') = runState (f v) s'
-              in runState (g w) s'')
+             in runState (g w) s'')
 
  
-m >>= (\x -> f x >>= g) =                                      {Definición de >>=}
+m >>= (\x -> f x >>= g) =                                      
+-- {Definicion de >>=}
 State (\s -> let (v, s') = runState m s 
-              in runState ((\x -> f x >>= g) x) s') =          {Aplicación de función anónima}*
+             in runState ((\x -> f x >>= g) v) s') =          
+-- {Aplicacion de funcion anonima}
 State (\s -> let (v, s') = runState m s 
-              in runState (f x >>= g) s') =                    {Definición de >>=}*
+             in runState (f v >>= g) s') =                    
+-- {Definicion de >>=}
 State (\s -> let (v, s') = runState m s 
-              in runState (State (\s -> let (v, s') = runState (f x) s
-                                         in runState (g v) s')) s') =   {Definición de runState}*
+              in runState (State (\s -> let (v, s') = runState (f v) s
+                                         in runState (g v) s')) s') =   
+-- {Definicion de runState}
 State (\s -> let (v, s') = runState m s 
-              in (\s -> let (v, s') = runState (f x) s
-                         in runState (g v) s') s') =           {Aplicación de función anónima}*
+              in (\s -> let (v, s') = runState (f v) s
+                         in runState (g v) s') s') =           
+-- {Aplicacion de funcion anonima}
 State (\s -> let (v, s') = runState m s 
-              in (let (v, s') = runState (f x) s'
-                   in runState (g v) s')) =                    {Reescritura de let}*
+              in (let (v, s') = runState (f v) s'
+                   in runState (g v) s')) =                    
+-- {Se reescribe el let de la siguiente forma:  
+-- let a = b in (let c = f(a) in g(c))
+-- let a = b
+--     c = f(a)
+--  in g(c)}
 State (\s -> let (v, s')  = runState m s 
-                 (w, s'') = runState (f x) s'
-              in runState (g w) s'')
-              
-              
-
+                 (w, s'') = runState (f v) s'
+             in runState (g w) s'')
+             
+-- {Ambos terminos son iguales a una misma expresion}
+-- {Por transitividad, (m >>= f) >>= g = m >>= (\x -> f x >>= g)}
